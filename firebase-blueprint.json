@@ -1,0 +1,132 @@
+{
+  "entities": {
+    "Member": {
+      "title": "Member",
+      "description": "Gym member details and subscription status",
+      "type": "object",
+      "properties": {
+        "member_id": { "type": "string", "maxLength": 64, "description": "Unique member identifier code" },
+        "full_name": { "type": "string", "maxLength": 128, "description": "Member's full legal name" },
+        "plan_type": { "type": "string", "maxLength": 64, "description": "Membership plan tier" },
+        "trainer_id": { "type": "number", "description": "Assigned trainer ID" },
+        "trainer_name": { "type": "string", "maxLength": 128, "description": "Assigned trainer full name" },
+        "join_date": { "type": "string", "maxLength": 32, "description": "Join date in YYYY-MM-DD" },
+        "expiry_date": { "type": "string", "maxLength": 32, "description": "Membership expiration date" },
+        "status": { "type": "string", "enum": ["Active", "Expiring", "Paused", "Expired"], "description": "Current membership status" }
+      },
+      "required": ["member_id", "full_name", "plan_type", "join_date", "expiry_date", "status"]
+    },
+    "StaffUser": {
+      "title": "StaffUser",
+      "description": "Gym staff user or system administrator",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string", "maxLength": 64, "description": "Username handle" },
+        "full_name": { "type": "string", "maxLength": 128, "description": "Staff member full name" },
+        "role": { "type": "string", "enum": ["Admin", "Staff"], "description": "Staff access role" },
+        "email": { "type": "string", "maxLength": 128, "description": "Staff email address" },
+        "phone": { "type": "string", "maxLength": 32, "description": "Staff contact phone number" },
+        "shift": { "type": "string", "maxLength": 64, "description": "Assigned work shift" },
+        "status": { "type": "string", "enum": ["Active", "Inactive"], "description": "Account status" },
+        "can_manage_members": { "type": "number", "description": "Permission flag for members" },
+        "can_process_payments": { "type": "number", "description": "Permission flag for payments" },
+        "can_manage_classes": { "type": "number", "description": "Permission flag for classes" },
+        "can_manage_trainers": { "type": "number", "description": "Permission flag for trainers" },
+        "created_at": { "type": "string", "maxLength": 64, "description": "Account creation timestamp" }
+      },
+      "required": ["username", "full_name", "role", "status"]
+    },
+    "Trainer": {
+      "title": "Trainer",
+      "description": "Fitness trainer or coach",
+      "type": "object",
+      "properties": {
+        "trainer_code": { "type": "string", "maxLength": 32, "description": "Trainer identifier code" },
+        "full_name": { "type": "string", "maxLength": 128, "description": "Trainer full name" },
+        "specialty": { "type": "string", "maxLength": 128, "description": "Trainer specialty" },
+        "rating": { "type": "number", "description": "Average coach rating" }
+      },
+      "required": ["trainer_code", "full_name", "specialty"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "Daily gym floor check-in and check-out records",
+      "type": "object",
+      "properties": {
+        "member_id": { "type": "string", "maxLength": 64, "description": "Member ID of attendee" },
+        "check_in_time": { "type": "string", "maxLength": 64, "description": "Check-in timestamp" },
+        "check_out_time": { "type": "string", "maxLength": 64, "description": "Check-out timestamp or null" },
+        "check_in_method": { "type": "string", "maxLength": 64, "description": "Method of check-in" }
+      },
+      "required": ["member_id", "check_in_time", "check_in_method"]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "Gym membership dues, fee records, and invoices",
+      "type": "object",
+      "properties": {
+        "member_id": { "type": "string", "maxLength": 64, "description": "Member ID of payer" },
+        "plan_description": { "type": "string", "maxLength": 128, "description": "Plan description" },
+        "amount": { "type": "number", "description": "Payment amount in INR" },
+        "due_date": { "type": "string", "maxLength": 32, "description": "Payment due date" },
+        "payment_status": { "type": "string", "enum": ["Paid", "Pending", "Overdue"], "description": "Invoice status" }
+      },
+      "required": ["member_id", "plan_description", "amount", "due_date", "payment_status"]
+    },
+    "GymClass": {
+      "title": "GymClass",
+      "description": "Scheduled studio fitness class session",
+      "type": "object",
+      "properties": {
+        "class_name": { "type": "string", "maxLength": 128, "description": "Class title" },
+        "trainer_id": { "type": "number", "description": "Assigned trainer ID" },
+        "studio_location": { "type": "string", "maxLength": 128, "description": "Studio room location" },
+        "start_time": { "type": "string", "maxLength": 32, "description": "Class start time" },
+        "max_capacity": { "type": "number", "description": "Maximum participant capacity" },
+        "booked_count": { "type": "number", "description": "Current booked count" }
+      },
+      "required": ["class_name", "trainer_id", "studio_location", "start_time", "max_capacity"]
+    },
+    "ClassBooking": {
+      "title": "ClassBooking",
+      "description": "Member reservation in a gym class",
+      "type": "object",
+      "properties": {
+        "class_id": { "type": "number", "description": "Class ID reference" },
+        "member_id": { "type": "string", "maxLength": 64, "description": "Member ID reserved" },
+        "booked_at": { "type": "string", "maxLength": 64, "description": "Booking timestamp" }
+      },
+      "required": ["class_id", "member_id", "booked_at"]
+    }
+  },
+  "firestore": {
+    "/members/{memberId}": {
+      "schema": { "$ref": "#/entities/Member" },
+      "description": "Collection of gym member profiles"
+    },
+    "/staff_users/{staffId}": {
+      "schema": { "$ref": "#/entities/StaffUser" },
+      "description": "Collection of gym staff members"
+    },
+    "/trainers/{trainerId}": {
+      "schema": { "$ref": "#/entities/Trainer" },
+      "description": "Collection of gym trainers"
+    },
+    "/attendance/{attendanceId}": {
+      "schema": { "$ref": "#/entities/Attendance" },
+      "description": "Collection of check-in and check-out logs"
+    },
+    "/payments/{paymentId}": {
+      "schema": { "$ref": "#/entities/Payment" },
+      "description": "Collection of payment and dues records"
+    },
+    "/classes/{classId}": {
+      "schema": { "$ref": "#/entities/GymClass" },
+      "description": "Collection of fitness class sessions"
+    },
+    "/class_bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/ClassBooking" },
+      "description": "Collection of member class reservations"
+    }
+  }
+}

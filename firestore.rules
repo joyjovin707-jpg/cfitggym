@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/staff_users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/staff_users/$(request.auth.uid)).data.role == 'Admin'
+      );
+    }
+
+    // Members collection
+    match /members/{memberId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(memberId);
+    }
+
+    // Staff Users collection
+    match /staff_users/{staffId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(staffId);
+    }
+
+    // Trainers collection
+    match /trainers/{trainerId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(trainerId);
+    }
+
+    // Attendance collection
+    match /attendance/{attendanceId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(attendanceId);
+    }
+
+    // Payments collection
+    match /payments/{paymentId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(paymentId);
+    }
+
+    // Classes collection
+    match /classes/{classId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(classId);
+    }
+
+    // Class bookings collection
+    match /class_bookings/{bookingId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(bookingId);
+    }
+  }
+}
